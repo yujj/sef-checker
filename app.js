@@ -1,34 +1,65 @@
 (function () {
     var app = angular.module('sefChecker', []);
 
-    var urlLists = [];
+    app.controller('SefCheckerController', function($scope, $http) {
 
-    app.controller('SefCheckerController', function($scope) {
+        this.urlList = [];
+        this.lengthError = false;
+        this.httpError = false;
 
-        this.urlList = urlLists;
+        $scope['originalList'] = 'http://rozbl.ru/catalogue.html?FLOWER=5';
+        $scope['sefList'] = 'http://rozbl.ru/catalogue/lepestki-roz.html';
 
         this.prepareList = function(name) {
-            text = $scope[name];
+            var text = $scope[name];
             text = text.replace(/[\n]{2,}/g, "\n");
             text = text.replace(/[\r]{2,}/g, "\r");
             text = text.replace(/[\r\n]{2,}/g, "\r\n");
-            text = text.replace(/^\s+/g, "");
-            text = text.replace(/\s+$/g, "");
+            text = text.replace(/^\s*/g, "");
+            text = text.replace(/\s*$/g, "");
             $scope[name] = text;
         };
 
-        this.checkUrls = function() {
-            var original = $scope.originalList.split(/\r|\r\n|\n/);
-            var sef = $scope.sefList.split(/\r|\r\n|\n/);
-            //if (original.size() == sef.size()) {
-                original.forEach(function(item, i) {
-                    this.urlList.push([item, sef[i]]);
+        this.creatList = function() {
+            this.lengthError = false;
+            if ($scope.originalList != undefined && $scope.sefList != undefined) {
+                var original = $scope.originalList.split(/\r|\r\n|\n/);
+                var sef = $scope.sefList.split(/\r|\r\n|\n/);
+                this.urlList = [];
+                if (original.length == sef.length) {
+                    for (var i = 0; i < original.length; i++) {
+                        this.urlList.push({original: {url: original[i], http_code: 0, status: ''}, sef: {url: sef[i], http_code: 0, status: false}});
+                    }
+                }else {
+                    this.lengthError = true;
+                }
+            }
+        };
+
+        this.checkUrls = function(index) {
+            this.creatList();
+            this.httpError = false;
+            if (index < this.urlList.length) {
+                this.urlList[index].original.status = 1;
+
+                var responsePromise = $http.get("response.php?url="+this.urlList[index].original.url);
+
+                responsePromise.success(function(data, status, headers, config) {
+                   // this.urlList[index].original.http_code = data.http_code;
+                    if (data.http_code == "301") {
+                        this.urlList[index].original.status = 2;
+                    }
+                    this.urlList[index].original.status = 2;
+                   
                 });
-           // }
+
+                responsePromise.error(function(data, status, headers, config) {
+                    this.httpError = true;
+                });
+            }
         };
 
     });
-
 
 }());
 /*

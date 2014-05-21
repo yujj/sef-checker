@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:ng="http://angularjs.org" ng-app="sefChecker">
 <head>
     <meta charset="utf-8">
     <title>SEF Checker</title>
@@ -7,21 +7,31 @@
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" />
     <style>
         textarea{width: 100%;}
+        .glyphicon{top: 3px;}
+        button{margin-bottom: 3px;}
     </style>
 </head>
-<body ng-app="sefChecker">
-    <div class="wrapper" ng-controller="SefCheckerController as checker">
-    <div class="row"><div class="col-md-12">&nbsp;</div></div>
+<body ng-controller="SefCheckerController as checker">
+    <div class="wrapper">
+    <div class="row"><div class="col-md-12">&nbsp;</div></div>    
     <div class="row">
         <div class="col-md-1"></div>
-        <div class="col-md-5"><textarea rows="20" ng-model="originalList" ng-change="checker.prepareList('originalList')" placeholder="Оригинальные URL'ы"></textarea></div>
-        <div class="col-md-5"><textarea rows="20" ng-model="sefList" ng-change="checker.prepareList('sefList')" placeholder="ЧПУ"></textarea></div>
+        <div class="col-md-10">
+            <div class="alert alert-danger" ng-show="checker.lengthError">Количество ссылок в полях должно быть одинаково</div>&nbsp;
+            <div class="alert alert-danger" ng-show="checker.httpError">Ошибка при HTTP запросе</div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-5"><textarea rows="20" ng-model="originalList" ng-change="checker.prepareList('originalList');checker.creatList()" placeholder="Оригинальные URL'ы"></textarea></div>
+        <div class="col-md-5"><textarea rows="20" ng-model="sefList" ng-change="checker.prepareList('sefList');checker.creatList()" placeholder="ЧПУ"></textarea></div>
         <div class="col-md-1"></div>
     </div>
     <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-10">
-            <button type="button" class="btn btn-default btn-lg" ng-click="checker.checkUrls()" ng-show="originalList && sefList">
+            <button type="button" class="btn btn-default btn-lg" ng-click="checker.checkUrls(0)" ng-show="originalList && sefList && !checker.lengthError">
                 <span class="glyphicon glyphicon-play-circle"></span> Проверить
             </button>
         </div>
@@ -32,8 +42,12 @@
         <div class="col-md-10">
             <table class="table table-striped">
                 <tr ng-repeat="row in checker.urlList">
-                    <td>{{row[0]}}</td>
-                    <td>{{row[1]}}</td>
+                    <td>
+                        <span ng-show="row.original.status == 1">whait</span> 
+                        <span ng-show="row.original.status == 2">301</span>
+                        {{row.original.url}}
+                    </td>
+                    <td><span ng-show="row.sef.status == 1">whait</span> {{row.sef.url}}</td>
                 </tr>
             </table>
         </div>
