@@ -8,30 +8,32 @@
     <style>
         textarea{width: 100%;}
         .glyphicon{top: 3px;}
-        button{margin-bottom: 3px;}
+        .alert{display: none;}
+        .refresh{width: 40px;color: blue;}
+        .row {margin-bottom: 1em;}
     </style>
 </head>
-<body ng-controller="SefCheckerController as checker">
+<body ng-controller="SefCheckerController">
     <div class="wrapper">
     <div class="row"><div class="col-md-12">&nbsp;</div></div>    
-    <div class="row">
+    <div class="row" ng-show="lengthError || httpError">
         <div class="col-md-1"></div>
         <div class="col-md-10">
-            <div class="alert alert-danger" ng-show="checker.lengthError">Количество ссылок в полях должно быть одинаково</div>&nbsp;
-            <div class="alert alert-danger" ng-show="checker.httpError">Ошибка при HTTP запросе</div>
+            <div class="alert alert-danger" ng-show="lengthError">Количество ссылок в полях должно быть одинаково</div>&nbsp;
+            <div class="alert alert-danger" ng-show="httpError">Ошибка при HTTP запросе</div>
         </div>
         <div class="col-md-1"></div>
     </div>
     <div class="row">
         <div class="col-md-1"></div>
-        <div class="col-md-5"><textarea rows="20" ng-model="originalList" ng-change="checker.prepareList('originalList');checker.creatList()" placeholder="Оригинальные URL'ы"></textarea></div>
-        <div class="col-md-5"><textarea rows="20" ng-model="sefList" ng-change="checker.prepareList('sefList');checker.creatList()" placeholder="ЧПУ"></textarea></div>
+        <div class="col-md-5"><textarea rows="20" ng-model="originalList" ng-change="prepareList('originalList');creatList()" placeholder="Оригинальные URL'ы"></textarea></div>
+        <div class="col-md-5"><textarea rows="20" ng-model="sefList" ng-change="prepareList('sefList');creatList()" placeholder="ЧПУ"></textarea></div>
         <div class="col-md-1"></div>
     </div>
     <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-10">
-            <button type="button" class="btn btn-default btn-lg" ng-click="checker.checkUrls(0)" ng-show="originalList && sefList && !checker.lengthError">
+            <button type="button" class="btn btn-default btn-lg" ng-click="checkUrls(0)" ng-show="originalList && sefList && !lengthError">
                 <span class="glyphicon glyphicon-play-circle"></span> Проверить
             </button>
         </div>
@@ -41,13 +43,27 @@
         <div class="col-md-1"></div>
         <div class="col-md-10">
             <table class="table table-striped">
-                <tr ng-repeat="row in checker.urlList">
+                <tr ng-repeat="(index, row) in urlList">
                     <td>
-                        <span ng-show="row.original.status == 1">whait</span> 
-                        <span ng-show="row.original.status == 2">301</span>
+                        <span ng-show="row.original.status == 1" class="label label-default">whait</span> 
+                        <span ng-show="row.original.status == 2" class="label label-success">301</span>
+                        <span ng-show="row.original.status == 3" class="label label-warning">301</span>
+                        <span ng-show="row.original.status == 4" class="label label-danger">{{row.original.http_code}}</span>
                         {{row.original.url}}
                     </td>
-                    <td><span ng-show="row.sef.status == 1">whait</span> {{row.sef.url}}</td>
+                    <td>
+                        <span ng-show="row.sef.status == 1" class="label label-default">whait</span> 
+                        <span ng-show="row.sef.status == 2" class="label label-success">200</span>
+                        <span ng-show="row.sef.status == 3" class="label label-danger">{{row.sef.http_code}}</span>
+                        {{row.sef.url}}
+                    </td>
+                    <td class="refresh">
+                        <div class="btn-group btn-group-xs">
+                            <button type="button" class="btn btn-default btn-lg" ng-click="checkOriginalUrl(index, true)">
+                                <span class="glyphicon glyphicon-refresh"></span>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             </table>
         </div>
