@@ -3,8 +3,8 @@ if (isset($_REQUEST['url'])) {
     header("Content-type: application/json; charset=utf-8");
     $GLOBALS['headers'] = array();
     $response = checkLink($_REQUEST['url']);
-    $response['url'] = urldecode($response['url']);
-    $response['orig_url'] = urldecode(urlencodeAsBrowser($_REQUEST['url']));
+    $response['url'] = pepareUrl($response['url'], false);
+    $response['orig_url'] = pepareUrl($_REQUEST['url']);
     $response['http_code'] = $GLOBALS['headers'][0];
     echo json_encode($response);
     exit();
@@ -16,23 +16,24 @@ function readHeader($ch, $header)
         $GLOBALS['headers'][] = $h[1];
     }
     return strlen($header);
-} 
-function urlencodeAsBrowser($url){
+}
+
+function pepareUrl($url, $encode = true){
     include_once('idna_convert.class.php');
     $IDN = new idna_convert();
-    $domain = parse_url($url, PHP_URL_HOST);
-    $encoded_domain = $IDN->encode($domain);
-    $url = str_replace($domain, $encoded_domain, $url);
+    $domain = parse_url(urldecode($url), PHP_URL_HOST);
+    $new_domain = ($encode) ? $IDN->encode($domain) : $IDN->decode($domain);
+    $url = str_replace($domain, $new_domain, $url);
 
-    $url = str_replace(
+    /*$url = str_replace(
         array("%2F", "%3F", "%3D", "%40", "%3A", "%26", "%3B", "%2A", "%27"), 
         array("/",   "?",   "=",   "@",   ":",   "&",   ";",   "*",   "'"  ), 
-        urlencode(urldecode($url)));
+        urlencode(urldecode($url)));*/
     return $url;
 }
 
 function checkLink($url) {
-    $url = urlencodeAsBrowser($url);
+    $url = pepareUrl($url);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
