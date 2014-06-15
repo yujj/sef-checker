@@ -6,9 +6,6 @@
         $scope.lengthError = false;
         $scope.httpError = false;
 
-        $scope.originalList = "http://mebel-tatyana.com/dvuspalnye-krovati\nhttp://mebel-tatyana.com/korpusnaya-mebel\nhttp://mebel-tatyana.com/sadovaya-mebel";
-        $scope.sefList = "http://mebel-tatyana.com/krovati/dvuspalnye\nhttp://mebel-tatyana.com/korpusnaya\nhttp://mebel-tatyana.com/dlya-dachi";
-
         $scope.prepareList = function(name) {
             var text = $scope[name];
             text = text.replace(/[\n]{2,}/g, "\n");
