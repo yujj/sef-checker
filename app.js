@@ -34,10 +34,10 @@
 
         $scope.checkUrls = function(index) {
             $scope.creatList();
-            $scope.checkOriginalUrl(index);
+            $scope.checkOriginalUrl(index, false);
         }
 
-        $scope.checkOriginalUrl = function(index, onse = false) {
+        $scope.checkOriginalUrl = function(index, onse) {
             if ($scope.urlList[index].original.url == '') {
                 return false;
             }
@@ -86,7 +86,7 @@
                         $scope.urlList[index].sef.status = 3;
                     }
                     if (!onse) {
-                        $scope.checkOriginalUrl(index+1);
+                        $scope.checkOriginalUrl(index+1, false);
                     }
                 });
                 responsePromise.error(function(data, status, headers, config) {
